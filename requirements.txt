@@ -1,0 +1,6 @@
+streamlit>=1.33
+folium>=0.16
+streamlit-folium>=0.21
+pandas>=2.0
+matplotlib>=3.8
+contextily>=1.5
