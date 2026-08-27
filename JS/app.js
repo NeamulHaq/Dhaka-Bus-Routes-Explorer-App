@@ -238,7 +238,7 @@ async function exportJPEG(){
   var exportEl=ensureExportMap(),exportMap=null,group=null,cleanup=[];
   try{
     exportMap=L.map(exportEl,{zoomControl:false,attributionControl:false,preferCanvas:false,fadeAnimation:false,zoomAnimation:false});
-    var base=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous'}).addTo(exportMap);cleanup.push(function(){exportMap.removeLayer(base);});
+    var base=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous', opacity: 0.6}).addTo(exportMap);cleanup.push(function(){exportMap.removeLayer(base);});
     group=L.layerGroup().addTo(exportMap);
     var bounds=L.latLngBounds([]);
     selectedRoutes.forEach(function(f){
