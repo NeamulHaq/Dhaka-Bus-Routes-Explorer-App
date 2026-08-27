@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>DTCA · Bus Route Rationalization — Interactive Web GIS</title>
+<link rel="stylesheet" href="Leaflet/leaflet.css">
+<link rel="stylesheet" href="Leaflet/MarkerCluster.css">
+<link rel="stylesheet" href="Leaflet/MarkerCluster.Default.css">
+<link rel="stylesheet" href="CSS/app.css">
+</head>
+<body>
+<div id="dataError" class="data-error" role="alert"></div>
+
+<div id="shell">
+
+  <header id="hdr">
+    <button id="menuBtn" aria-label="Toggle layers menu">☰</button>
+    <div class="mark">DTCA</div>
+    <div class="titles">
+      <div class="t1">Bus Route Rationalization Project — Official Bus Network</div>
+      <div class="t2">Dhaka Transport Coordination Authority (DTCA) · Interactive Route &amp; Stop Explorer</div>
+    </div>
+    <div id="mapTools" class="map-tools" aria-label="Map tools">
+      <button type="button" class="map-tool" id="measureBtn" title="Measure distance or area"><span class="tool-icon">⌁</span><span>Measure</span></button>
+      <button type="button" class="map-tool" id="selectPolyBtn" title="Select routes and stops by polygon"><span class="tool-icon">⬡</span><span>Select</span></button>
+      <button type="button" class="map-tool" id="editBtn" title="Edit temporary user drawings only"><span class="tool-icon">✎</span><span>Edit Drawings</span></button>
+      <div id="editSubtools" class="edit-subtools" aria-label="Temporary drawing editing tools">
+        <button type="button" class="subtool" id="moveFeatureBtn" title="Move temporary feature"><span>✥</span> Move</button>
+        <button type="button" class="subtool" id="vertexEditBtn" title="Edit temporary route vertices"><span>●</span> Vertices</button>
+        <button type="button" class="subtool" id="addVertexBtn" title="Add vertex to temporary route"><span>＋</span> Add Vertex</button>
+        <button type="button" class="subtool" id="deleteVertexBtn" title="Delete vertex from temporary route"><span>−</span> Delete Vertex</button>
+        <button type="button" class="subtool" id="editAttrBtn" title="Official GeoJSON attributes are read-only"><span>▤</span> Read Only</button>
+        <button type="button" class="subtool" id="editStopBtn" title="Edit temporary stop"><span>⌖</span> Stop</button>
+        <button type="button" class="subtool" id="deleteTempBtn" title="Delete a temporary route or stop"><span>⌫</span> Delete</button>
+      </div>
+      <button type="button" class="map-tool" id="drawBtn" title="Create temporary routes and stops"><span class="tool-icon">＋</span><span>Draw</span></button>
+      <div id="drawSubtools" class="edit-subtools" aria-label="Temporary drawing tools">
+        <button type="button" class="subtool" id="drawRouteBtn" title="Draw a temporary route"><span>╱</span> Route</button>
+        <button type="button" class="subtool" id="drawPointBtn" title="Draw a temporary stop"><span>●</span> Point</button>
+        <button type="button" class="subtool" id="clearDrawBtn" title="Delete all temporary drawings"><span>×</span> Clear</button>
+      </div>
+      <button type="button" class="map-tool" id="jpegExportBtn" title="Export selected route and temporary drawings as JPEG"><span class="tool-icon">▣</span><span>Map JPEG</span></button>
+      <button type="button" class="map-tool" id="tableBtn" title="View read-only attribute table"><span class="tool-icon">▦</span><span>Table</span></button>
+      <div id="toolStatus" class="tool-status">Ready</div>
+    </div>
+    <div class="hdr-stats">
+      <div><b id="hdrRoutes">98</b>Routes</div>
+      <div><b id="hdrStops">1,140</b>Stops</div>
+    </div>
+  </header>
+
+  <div id="main">
+    <div id="map"></div>
+
+    <aside id="sidebar">
+      <div class="sb-scroll">
+        <div class="sb-section">
+          <div class="sb-label">Search Routes</div>
+          <input id="searchBox" type="text" placeholder="Route ID, operator, or corridor…" autocomplete="off"/>
+          <div id="searchResults"></div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Layers</div>
+          <div class="layer-row"><input type="checkbox" id="toggleRoutes" checked><span class="swatch" style="background:#2B6CB0"></span><label for="toggleRoutes">Bus Routes (98)</label></div>
+          <div class="layer-row"><input type="checkbox" id="toggleStops" checked><span class="swatch dot"></span><label for="toggleStops">Bus Stops (1,140)</label></div>
+          <div class="layer-row"><input type="checkbox" id="toggleCorridors" checked><span class="swatch dash"></span><label for="toggleCorridors">Priority Corridors</label></div>
+          <div class="layer-row"><input type="checkbox" id="toggleAdmin"><span class="swatch poly"></span><label for="toggleAdmin">Administrative Zones</label></div>
+        </div>
+
+        <div class="sb-section">
+          <div class="sb-label">Legend</div>
+          <div class="legend-item"><span class="swatch" style="background:#2B6CB0"></span> Non-AC route</div>
+          <div class="legend-item"><span class="swatch" style="background:#0E7C86"></span> AC route</div>
+          <div class="legend-item"><span class="swatch" style="background:#E4572E"></span> Selected route</div>
+          <div class="legend-item"><span class="swatch dash"></span> Priority corridor</div>
+          <div class="legend-item"><span class="swatch dot"></span> Bus stop</div>
+        </div>
+
+        <div class="sb-section recommendation-section">
+          <div class="sb-label">Route Recommendation</div>
+          <div class="rec-inputs">
+            <label class="stop-search-label">Origin
+              <input id="originInput" class="stop-search" type="text" placeholder="Search origin stop…" autocomplete="off"/>
+              <div id="originResults" class="stop-search-results"></div>
+            </label>
+            <label class="stop-search-label">Destination
+              <input id="destinationInput" class="stop-search" type="text" placeholder="Search destination stop…" autocomplete="off"/>
+              <div id="destinationResults" class="stop-search-results"></div>
+            </label>
+            <button id="recommendBtn" class="recommend-btn">Find Best Route</button>
+          </div>
+          <div id="recommendation" class="recommendation"></div>
+        </div>
+      </div>
+    </aside>
+
+    <section id="networkSummary" class="network-summary">
+      <div class="summary-title">Network Summary</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="n" id="statRoutes">—</div><div class="l">Routes</div></div>
+        <div class="stat-box"><div class="n" id="statStops">—</div><div class="l">Mapped Stops</div></div>
+        <div class="stat-box"><div class="n" id="statLength">—</div><div class="l">Network km</div></div>
+        <div class="stat-box"><div class="n" id="statAC">—</div><div class="l">AC Routes</div></div>
+      </div>
+      <button id="resetBtn">↺ Reset view</button>
+    </section>
+
+    <section id="detail">
+      <button class="dp-close" id="detailCloseBtn" aria-label="Close route information">&times;</button>
+      <div id="detailBody"><div id="detailEmptyHint">Select a route or stop on the map to see full details here.</div></div>
+    </section>
+  </div>
+
+  <section id="attributeTable" aria-label="Attribute table">
+    <div class="table-head">
+      <div><strong>DTCA Attribute Table</strong><span id="tableRecordCount" class="table-count"></span></div>
+      <button id="tableCloseBtn" class="table-close" title="Close table">×</button>
+    </div>
+    <div class="table-toolbar">
+      <div class="table-tabs"><button id="routesTab" class="table-tab active">Routes</button><button id="stopsTab" class="table-tab">Stops</button></div>
+      <input id="tableSearch" class="table-search" placeholder="Search attributes…" autocomplete="off">
+    </div>
+    <div class="table-scroll"><table><thead><tr id="attributeTableHead"><th>Route ID</th><th>Operator</th><th>Bus Type</th><th>Length</th><th>Headway</th><th>Trips / Day</th></tr></thead><tbody id="attributeTableBody"></tbody></table></div>
+    <div class="table-foot">Click a record to select it on the map. Official GeoJSON routes, stops, geometry and attributes are <b>read-only</b>. Use <b>Draw</b> for temporary user features.</div>
+  </section>
+
+  <footer id="ftr">
+    <span>Source: DTCA Bus Route Rationalization (BRR) Project — Technical Report #1 (23.10.2024)</span>
+    <span>Prepared for internal planning review · Not for public distribution</span>
+  </footer>
+</div>
+
+<script src="Leaflet/leaflet.js"></script>
+<script src="Leaflet/leaflet.markercluster.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="script/bootstrap.js"></script>
+
+</body>
+</html>
