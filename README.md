@@ -1,4 +1,4 @@
-# DTCA Bus Route Explorer — Final Read-Only + Temporary Drawing Edition
+# Dhaka Bus Route Explorer
 
 ## Data model
 The files in `data/` are the official source layers and are **read-only in the web application**:
