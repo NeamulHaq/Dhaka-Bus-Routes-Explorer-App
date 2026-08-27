@@ -4,7 +4,7 @@
 var map=L.map('map',{zoomControl:false,minZoom:9,maxZoom:18}).setView([23.79,90.41],11);
 L.control.zoom({position:'bottomright'}).addTo(map);
 L.control.scale({position:'bottomright',imperial:false}).addTo(map);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous',attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous',attribution:'© OpenStreetMap contributors © CARTO'}).addTo(map);
 
 var selectedLayer=null,selectedRoutes=[],selectedStops=[];
 var routeLayerById={};
@@ -238,7 +238,7 @@ async function exportJPEG(){
   var exportEl=ensureExportMap(),exportMap=null,group=null,cleanup=[];
   try{
     exportMap=L.map(exportEl,{zoomControl:false,attributionControl:false,preferCanvas:false,fadeAnimation:false,zoomAnimation:false});
-    var base=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous'}).addTo(exportMap);cleanup.push(function(){exportMap.removeLayer(base);});
+    var base=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:20,crossOrigin:'anonymous'}).addTo(exportMap);cleanup.push(function(){exportMap.removeLayer(base);});
     group=L.layerGroup().addTo(exportMap);
     var bounds=L.latLngBounds([]);
     selectedRoutes.forEach(function(f){
